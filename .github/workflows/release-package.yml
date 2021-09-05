@@ -61,10 +61,10 @@ jobs:
       - name: Build ZIP
         run: |
           pushd amd64
-          zip -r '${{env.APP_NAME}}-amd64.zip' '${{env.APP_NAME}}.app'
+          zip -r '../${{env.APP_NAME}}-amd64.zip' '${{env.APP_NAME}}.app'
           popd
           # pushd arm64
-          # zip -r '${{env.APP_NAME}}-arm64.zip' '${{env.APP_NAME}}.app'
+          # zip -r '../${{env.APP_NAME}}-arm64.zip' '${{env.APP_NAME}}.app'
           # popd
       - name: Release
         uses: softprops/action-gh-release@v1
