@@ -33,8 +33,8 @@ jobs:
           #   """
       - name: Build macOS application
         run: |
-          mkdir -p ${{env.APP_NAME}}.app/Contents/MacOS
-          mkdir -p ${{env.APP_NAME}}.app/Contents/Resources
+          mkdir -p '${{env.APP_NAME}}.app/Contents/MacOS'
+          mkdir -p '${{env.APP_NAME}}.app/Contents/Resources'
           echo """
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -52,16 +52,16 @@ jobs:
             <string>$(sed -re 's|$v||' <<< ${{github.event.release.tag_name}}).$(date +%s)</string>
           </dict>
           </plist>
-          """ > ${{env.APP_NAME}}.app/Contents/Info.plist
+          """ > '${{env.APP_NAME}}.app/Contents/Info.plist'
           mkdir amd64 arm64
-          cp ${{env.APP_NAME}}.app amd64
-          cp ${{env.BIN_NAME}}-amd64 amd64/${{env.APP_NAME}}.app/Contents/MacOS/${{env.BIN_NAME}}
-          # cp ${{env.APP_NAME}}.app arm64
-          # cp ${{env.BIN_NAME}}-arm64 arm64/${{env.APP_NAME}}.app/Contents/MacOS/${{env.BIN_NAME}}
+          cp '${{env.APP_NAME}}.app' amd64
+          cp ${{env.BIN_NAME}}-amd64 'amd64/${{env.APP_NAME}}.app/Contents/MacOS/${{env.BIN_NAME}}'
+          # cp '${{env.APP_NAME}}.app' arm64
+          # cp ${{env.BIN_NAME}}-arm64 'arm64/${{env.APP_NAME}}.app/Contents/MacOS/${{env.BIN_NAME}}'
       - name: Build ZIP
         run: |
-          zip -r ${{env.APP_NAME}}-amd64.zip amd64/${{env.APP_NAME}}.app
-          # zip -r ${{env.APP_NAME}}-arm64.zip arm64/${{env.APP_NAME}}.app
+          zip -r '${{env.APP_NAME}}-amd64.zip' 'amd64/${{env.APP_NAME}}.app'
+          # zip -r '${{env.APP_NAME}}-arm64.zip' 'arm64/${{env.APP_NAME}}.app'
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
