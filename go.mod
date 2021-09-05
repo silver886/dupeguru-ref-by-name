@@ -1,4 +1,4 @@
-module github.com/silver886/dupeguru-ref-by-name
+module github.com/silver886/dupeguru-reference-modifier
 
 go 1.17
 
