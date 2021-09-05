@@ -17,6 +17,8 @@ const (
 	fetchFileInfoButtonText          = "Fetch File Info"
 	sortByFilePathButtonText         = "Sort by File Path"
 	sortByFileNameButtonText         = "Sort by File Name"
+	sortByFileExtButtonText          = "Sort by File Extension Name"
+	sortBySizeButtonText             = "Sort by Size"
 	sortByCreationTimeButtonText     = "Sort by Creation Time"
 	sortByModificationTimeButtonText = "Sort by Modification Time"
 	sortByAccessNameButtonText       = "Sort by Access Name"
@@ -44,33 +46,39 @@ func gui() {
 	save.Disable()
 	file.Append(save, true)
 
-	action := ui.NewHorizontalBox()
-	action.SetPadded(true)
-	outer.Append(action, false)
+	defaultAction := ui.NewHorizontalBox()
+	defaultAction.SetPadded(true)
+	defaultAction.Disable()
+	outer.Append(defaultAction, false)
 
 	fetchFileInfo := ui.NewButton(fetchFileInfoButtonText)
-	fetchFileInfo.Disable()
-	action.Append(fetchFileInfo, true)
+	defaultAction.Append(fetchFileInfo, true)
 
 	sortByFilePath := ui.NewButton(sortByFilePathButtonText)
-	sortByFilePath.Disable()
-	action.Append(sortByFilePath, true)
+	defaultAction.Append(sortByFilePath, true)
 
 	sortByFileName := ui.NewButton(sortByFileNameButtonText)
-	sortByFileName.Disable()
-	action.Append(sortByFileName, true)
+	defaultAction.Append(sortByFileName, true)
+
+	sortByFileExt := ui.NewButton(sortByFileExtButtonText)
+	defaultAction.Append(sortByFileExt, true)
+
+	fileInfoAction := ui.NewHorizontalBox()
+	fileInfoAction.SetPadded(true)
+	fileInfoAction.Disable()
+	outer.Append(fileInfoAction, false)
+
+	sortBySize := ui.NewButton(sortBySizeButtonText)
+	fileInfoAction.Append(sortBySize, true)
 
 	sortByCreationTime := ui.NewButton(sortByCreationTimeButtonText)
-	sortByCreationTime.Disable()
-	action.Append(sortByCreationTime, true)
+	fileInfoAction.Append(sortByCreationTime, true)
 
 	sortByModificationTime := ui.NewButton(sortByModificationTimeButtonText)
-	sortByModificationTime.Disable()
-	action.Append(sortByModificationTime, true)
+	fileInfoAction.Append(sortByModificationTime, true)
 
 	sortByAccessName := ui.NewButton(sortByAccessNameButtonText)
-	sortByAccessName.Disable()
-	action.Append(sortByAccessName, true)
+	fileInfoAction.Append(sortByAccessName, true)
 
 	tableModel := ui.NewTableModel(result)
 	table := ui.NewTable(&ui.TableParams{
@@ -78,11 +86,15 @@ func gui() {
 	})
 	table.AppendTextColumn("Group", 0, ui.TableModelColumnNeverEditable, nil)
 	table.AppendTextColumn("Path", 1, ui.TableModelColumnNeverEditable, nil)
-	table.AppendTextColumn("Words", 2, ui.TableModelColumnNeverEditable, nil)
-	table.AppendCheckboxColumn("Reference", 3, ui.TableModelColumnNeverEditable)
-	table.AppendCheckboxColumn("Marked", 4, ui.TableModelColumnNeverEditable)
-	table.AppendButtonColumn("Set Reference", 5, ui.TableModelColumnAlwaysEditable)
-	table.AppendButtonColumn("Mark", 6, ui.TableModelColumnAlwaysEditable)
+	table.AppendTextColumn("Size", 2, ui.TableModelColumnNeverEditable, nil)
+	table.AppendTextColumn("Creation Time", 3, ui.TableModelColumnNeverEditable, nil)
+	table.AppendTextColumn("Modification Time", 4, ui.TableModelColumnNeverEditable, nil)
+	table.AppendTextColumn("Access Time", 5, ui.TableModelColumnNeverEditable, nil)
+	table.AppendTextColumn("Words", 6, ui.TableModelColumnNeverEditable, nil)
+	table.AppendCheckboxColumn("Reference", 7, ui.TableModelColumnNeverEditable)
+	table.AppendCheckboxColumn("Marked", 8, ui.TableModelColumnNeverEditable)
+	table.AppendButtonColumn("Set Reference", 9, ui.TableModelColumnAlwaysEditable)
+	table.AppendButtonColumn("Mark", 10, ui.TableModelColumnAlwaysEditable)
 	outer.Append(table, false)
 	updateTable := func(oldRows, newRows int) {
 		duplicated := int(math.Min(float64(oldRows), float64(newRows)))
@@ -125,9 +137,8 @@ func gui() {
 		} else {
 			fileInfo = info
 			save.Enable()
-			fetchFileInfo.Enable()
-			sortByFilePath.Enable()
-			sortByFileName.Enable()
+			defaultAction.Enable()
+			fileInfoAction.Disable()
 			updateTable(oldRows, result.NumRows(tableModel))
 		}
 	})
@@ -143,17 +154,21 @@ func gui() {
 	})
 
 	fetchFileInfo.OnClicked(func(*ui.Button) {
+		result.fetchFileInfo()
+		rows := result.NumRows(tableModel)
+		updateTable(rows, rows)
+		fileInfoAction.Enable()
 	})
 
 	sortByFilePath.OnClicked(func(*ui.Button) {
 		if strings.Contains(sortByFilePath.Text(), ascending) {
 			for _, w := range result.Groups {
-				sort.Sort(SortByPath(w.Files))
+				sort.Sort(sort.Reverse(SortByPath(w.Files)))
 			}
 			sortByFilePath.SetText(sortByFilePathButtonText + " " + descending)
 		} else {
 			for _, w := range result.Groups {
-				sort.Sort(sort.Reverse(SortByPath(w.Files)))
+				sort.Sort(SortByPath(w.Files))
 			}
 			sortByFilePath.SetText(sortByFilePathButtonText + " " + ascending)
 		}
@@ -164,12 +179,12 @@ func gui() {
 	sortByFileName.OnClicked(func(*ui.Button) {
 		if strings.Contains(sortByFileName.Text(), ascending) {
 			for _, w := range result.Groups {
-				sort.Sort(SortByName(w.Files))
+				sort.Sort(sort.Reverse(SortByName(w.Files)))
 			}
 			sortByFileName.SetText(sortByFileNameButtonText + " " + descending)
 		} else {
 			for _, w := range result.Groups {
-				sort.Sort(sort.Reverse(SortByName(w.Files)))
+				sort.Sort(SortByName(w.Files))
 			}
 			sortByFileName.SetText(sortByFileNameButtonText + " " + ascending)
 		}
@@ -177,13 +192,84 @@ func gui() {
 		updateTable(rows, rows)
 	})
 
+	sortByFileExt.OnClicked(func(*ui.Button) {
+		if strings.Contains(sortByFileExt.Text(), ascending) {
+			for _, w := range result.Groups {
+				sort.Sort(sort.Reverse(SortByExt(w.Files)))
+			}
+			sortByFileExt.SetText(sortByFileExtButtonText + " " + descending)
+		} else {
+			for _, w := range result.Groups {
+				sort.Sort(SortByExt(w.Files))
+			}
+			sortByFileExt.SetText(sortByFileExtButtonText + " " + ascending)
+		}
+		rows := result.NumRows(tableModel)
+		updateTable(rows, rows)
+	})
+
+	sortBySize.OnClicked(func(*ui.Button) {
+		if strings.Contains(sortBySize.Text(), ascending) {
+			for _, w := range result.Groups {
+				sort.Sort(sort.Reverse(SortBySize(w.Files)))
+			}
+			sortBySize.SetText(sortBySizeButtonText + " " + descending)
+		} else {
+			for _, w := range result.Groups {
+				sort.Sort(SortBySize(w.Files))
+			}
+			sortBySize.SetText(sortBySizeButtonText + " " + ascending)
+		}
+		rows := result.NumRows(tableModel)
+		updateTable(rows, rows)
+	})
+
 	sortByCreationTime.OnClicked(func(*ui.Button) {
+		if strings.Contains(sortByCreationTime.Text(), ascending) {
+			for _, w := range result.Groups {
+				sort.Sort(sort.Reverse(SortByCreation(w.Files)))
+			}
+			sortByCreationTime.SetText(sortByCreationTimeButtonText + " " + descending)
+		} else {
+			for _, w := range result.Groups {
+				sort.Sort(SortByCreation(w.Files))
+			}
+			sortByCreationTime.SetText(sortByCreationTimeButtonText + " " + ascending)
+		}
+		rows := result.NumRows(tableModel)
+		updateTable(rows, rows)
 	})
 
 	sortByModificationTime.OnClicked(func(*ui.Button) {
+		if strings.Contains(sortByModificationTime.Text(), ascending) {
+			for _, w := range result.Groups {
+				sort.Sort(sort.Reverse(SortByModification(w.Files)))
+			}
+			sortByModificationTime.SetText(sortByModificationTimeButtonText + " " + descending)
+		} else {
+			for _, w := range result.Groups {
+				sort.Sort(SortByModification(w.Files))
+			}
+			sortByModificationTime.SetText(sortByModificationTimeButtonText + " " + ascending)
+		}
+		rows := result.NumRows(tableModel)
+		updateTable(rows, rows)
 	})
 
 	sortByAccessName.OnClicked(func(*ui.Button) {
+		if strings.Contains(sortByAccessName.Text(), ascending) {
+			for _, w := range result.Groups {
+				sort.Sort(sort.Reverse(SortByAccess(w.Files)))
+			}
+			sortByAccessName.SetText(sortByAccessNameButtonText + " " + descending)
+		} else {
+			for _, w := range result.Groups {
+				sort.Sort(SortByAccess(w.Files))
+			}
+			sortByAccessName.SetText(sortByAccessNameButtonText + " " + ascending)
+		}
+		rows := result.NumRows(tableModel)
+		updateTable(rows, rows)
 	})
 
 	window.Show()

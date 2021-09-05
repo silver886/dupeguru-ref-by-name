@@ -2,19 +2,24 @@ package main
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/andlabs/ui"
 )
 
 func (r *Result) ColumnTypes(tm *ui.TableModel) []ui.TableValue {
 	return []ui.TableValue{
-		ui.TableString(""), // column 0 Group Index
-		ui.TableString(""), // column 1 Path
-		ui.TableString(""), // column 2 Words
-		ui.TableInt(0),     // column 3 IsRef
-		ui.TableInt(0),     // column 4 Marked
-		ui.TableString(""), // column 5 IsRef button text
-		ui.TableString(""), // column 6 Marked button text
+		ui.TableString(""), // column  0 Group Index
+		ui.TableString(""), // column  1 Path
+		ui.TableString(""), // column  2 Size
+		ui.TableString(""), // column  3 Creation Time
+		ui.TableString(""), // column  4 Modification Time
+		ui.TableString(""), // column  5 Access Time
+		ui.TableString(""), // column  6 Words
+		ui.TableInt(0),     // column  7 IsRef
+		ui.TableInt(0),     // column  8 Marked
+		ui.TableString(""), // column  9 IsRef button text
+		ui.TableString(""), // column 10 Marked button text
 	}
 }
 
@@ -33,26 +38,50 @@ func (r *Result) CellValue(tm *ui.TableModel, row, column int) ui.TableValue {
 	case 1:
 		return ui.TableString(file.Path)
 	case 2:
-		return ui.TableString(file.Words)
+		if !file.fetched {
+			return ui.TableString("")
+		} else {
+			return ui.TableString(strconv.Itoa(int(file.size)))
+		}
 	case 3:
+		if !file.fetched {
+			return ui.TableString("")
+		} else {
+			return ui.TableString(file.time.creation.Format(time.RFC3339Nano))
+		}
+	case 4:
+		if !file.fetched {
+			return ui.TableString("")
+		} else {
+			return ui.TableString(file.time.modification.Format(time.RFC3339Nano))
+		}
+	case 5:
+		if !file.fetched {
+			return ui.TableString("")
+		} else {
+			return ui.TableString(file.time.access.Format(time.RFC3339Nano))
+		}
+	case 6:
+		return ui.TableString(file.Words)
+	case 7:
 		if file.IsRef == "y" {
 			return ui.TableTrue
 		} else {
 			return ui.TableFalse
 		}
-	case 4:
+	case 8:
 		if file.Marked == "y" {
 			return ui.TableTrue
 		} else {
 			return ui.TableFalse
 		}
-	case 5:
+	case 9:
 		if file.IsRef == "y" {
 			return ui.TableString("Unset reference")
 		} else {
 			return ui.TableString("Set as reference")
 		}
-	case 6:
+	case 10:
 		if file.Marked == "y" {
 			return ui.TableString("Check")
 		} else {
@@ -64,14 +93,14 @@ func (r *Result) CellValue(tm *ui.TableModel, row, column int) ui.TableValue {
 
 func (r *Result) SetCellValue(tm *ui.TableModel, row, column int, value ui.TableValue) {
 	switch groupId, fileId, file := r.locate(row, column); column {
-	case 5:
+	case 8:
 		switch file.IsRef {
 		case "n":
 			r.Groups[groupId].Files[fileId].IsRef = "y"
 		case "y":
 			r.Groups[groupId].Files[fileId].IsRef = "n"
 		}
-	case 6:
+	case 9:
 		switch file.Marked {
 		case "n":
 			r.Groups[groupId].Files[fileId].Marked = "y"

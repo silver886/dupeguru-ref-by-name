@@ -2,13 +2,24 @@ package main
 
 import (
 	"encoding/xml"
+	"os"
+	"sync"
+	"syscall"
+	"time"
 )
 
 type File struct {
-	Path   string `xml:"path,attr"`
-	Words  string `xml:"words,attr"`
-	IsRef  string `xml:"is_ref,attr"`
-	Marked string `xml:"marked,attr"`
+	Path    string `xml:"path,attr"`
+	Words   string `xml:"words,attr"`
+	IsRef   string `xml:"is_ref,attr"`
+	Marked  string `xml:"marked,attr"`
+	fetched bool
+	size    int64
+	time    struct {
+		creation     time.Time
+		modification time.Time
+		access       time.Time
+	}
 }
 
 type Match struct {
@@ -36,4 +47,32 @@ func (r *Result) locate(row, column int) (int, int, File) {
 		}
 	}
 	return 0, 0, File{}
+}
+
+func timespecToTime(ts syscall.Timespec) time.Time {
+	return time.Unix(int64(ts.Sec), int64(ts.Nsec))
+}
+
+func (r *Result) fetchFileInfo() {
+	var wg sync.WaitGroup
+	for i, v := range r.Groups {
+		wg.Add(len(v.Files))
+		for j, w := range v.Files {
+			groupId, fileId, file := i, j, w
+			go func() {
+				defer wg.Done()
+				if fileInfo, err := os.Stat(file.Path); err != nil {
+					return
+				} else {
+					r.Groups[groupId].Files[fileId].fetched = true
+					r.Groups[groupId].Files[fileId].size = fileInfo.Size()
+					fileStat := fileInfo.Sys().(*syscall.Stat_t)
+					r.Groups[groupId].Files[fileId].time.creation = timespecToTime(fileStat.Ctimespec)
+					r.Groups[groupId].Files[fileId].time.modification = timespecToTime(fileStat.Mtimespec)
+					r.Groups[groupId].Files[fileId].time.access = timespecToTime(fileStat.Atimespec)
+				}
+			}()
+		}
+	}
+	wg.Wait()
 }
