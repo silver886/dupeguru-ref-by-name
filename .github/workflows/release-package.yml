@@ -54,8 +54,8 @@ jobs:
           </plist>
           """ > '${{env.APP_NAME}}.app/Contents/Info.plist'
           mkdir amd64 arm64
-          cp '${{env.APP_NAME}}.app' amd64
-          cp ${{env.BIN_NAME}}-amd64 'amd64/${{env.APP_NAME}}.app/Contents/MacOS/${{env.BIN_NAME}}'
+          cp -r '${{env.APP_NAME}}.app' amd64
+          cp -r ${{env.BIN_NAME}}-amd64 'amd64/${{env.APP_NAME}}.app/Contents/MacOS/${{env.BIN_NAME}}'
           # cp '${{env.APP_NAME}}.app' arm64
           # cp ${{env.BIN_NAME}}-arm64 'arm64/${{env.APP_NAME}}.app/Contents/MacOS/${{env.BIN_NAME}}'
       - name: Build ZIP
