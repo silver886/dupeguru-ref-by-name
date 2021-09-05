@@ -50,15 +50,15 @@ func (r *Result) setFirstReference() {
 	}
 }
 
-func (r *Result) locate(row, column int) (int, int, File) {
+func (r *Result) locate(row, column int) (int, Group, int, File) {
 	for i, v := range r.Groups {
 		if count := len(v.Files); row < count {
-			return i, row, v.Files[row]
+			return i, v, row, v.Files[row]
 		} else {
 			row -= len(v.Files)
 		}
 	}
-	return 0, 0, File{}
+	return 0, Group{}, 0, File{}
 }
 
 func (r *Result) fetchFileInfo() {

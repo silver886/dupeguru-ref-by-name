@@ -87,7 +87,8 @@ func gui() {
 
 	tableModel := ui.NewTableModel(result)
 	table := ui.NewTable(&ui.TableParams{
-		Model: tableModel,
+		Model:                         tableModel,
+		RowBackgroundColorModelColumn: 11,
 	})
 	table.AppendTextColumn("Group", 0, ui.TableModelColumnNeverEditable, nil)
 	table.AppendTextColumn("Path", 1, ui.TableModelColumnNeverEditable, nil)

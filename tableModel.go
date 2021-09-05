@@ -20,6 +20,7 @@ func (r *Result) ColumnTypes(tm *ui.TableModel) []ui.TableValue {
 		ui.TableInt(0),     // column  8 Marked
 		ui.TableString(""), // column  9 IsRef button text
 		ui.TableString(""), // column 10 Marked button text
+		ui.TableColor{},    // row background color
 	}
 }
 
@@ -32,7 +33,7 @@ func (r *Result) NumRows(tm *ui.TableModel) int {
 }
 
 func (r *Result) CellValue(tm *ui.TableModel, row, column int) ui.TableValue {
-	switch groupId, _, file := r.locate(row, column); column {
+	switch groupId, group, fileId, file := r.locate(row, column); column {
 	case 0:
 		return ui.TableString(strconv.Itoa(groupId + 1))
 	case 1:
@@ -83,24 +84,60 @@ func (r *Result) CellValue(tm *ui.TableModel, row, column int) ui.TableValue {
 		}
 	case 10:
 		if file.Marked == "y" {
-			return ui.TableString("Check")
-		} else {
 			return ui.TableString("Uncheck")
+		} else {
+			return ui.TableString("Check")
+		}
+	case 11:
+		if file.IsRef == "y" {
+			return ui.TableColor{
+				R: 0.5,
+				G: 0.5,
+				B: 0.5,
+				A: 0.5,
+			}
+		} else if fileId == 0 {
+			reference := true
+			for i, v := range group.Files {
+				if i == 0 {
+					continue
+				}
+				if v.IsRef == "y" {
+					reference = false
+				}
+			}
+			if reference {
+				return ui.TableColor{
+					R: 0.5,
+					G: 0.5,
+					B: 0.5,
+					A: 0.5,
+				}
+			}
+		}
+		return ui.TableColor{
+			R: 0,
+			G: 0,
+			B: 0,
+			A: 0,
 		}
 	}
 	panic("unreachable")
 }
 
 func (r *Result) SetCellValue(tm *ui.TableModel, row, column int, value ui.TableValue) {
-	switch groupId, fileId, file := r.locate(row, column); column {
-	case 8:
+	switch groupId, group, fileId, file := r.locate(row, column); column {
+	case 9:
 		switch file.IsRef {
 		case "n":
 			r.Groups[groupId].Files[fileId].IsRef = "y"
 		case "y":
 			r.Groups[groupId].Files[fileId].IsRef = "n"
 		}
-	case 9:
+		for i := row - fileId; i < row-fileId+len(group.Files); i++ {
+			tm.RowChanged(i)
+		}
+	case 10:
 		switch file.Marked {
 		case "n":
 			r.Groups[groupId].Files[fileId].Marked = "y"
