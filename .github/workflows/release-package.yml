@@ -7,7 +7,7 @@ on:
 jobs:
   publish:
     name: Publish
-    runs-on: macos-11
+    runs-on: macos-10.15
     env:
       BIN_NAME: dupeguru-reference-modifier
       APP_NAME: dupeGuru Reference Modifier
