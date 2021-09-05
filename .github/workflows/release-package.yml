@@ -9,6 +9,7 @@ jobs:
     name: Publish
     runs-on: ubuntu-latest
     env:
+      GOOS: darwin
       BIN_NAME: dupeguru-reference-modifier
       APP_NAME: dupeGuru Reference Modifier
       PKG_ID: io.leoliu.dupeguru.reference-modifier
@@ -18,7 +19,17 @@ jobs:
       - name: Prepare environment
         uses: actions/setup-go@v2
       - name: Build binary
-        run: go build -o ${{env.BIN_NAME}}
+        run: |
+          GOARCH=amd64 go build \
+            -o ${{env.BIN_NAME}}-amd64 \
+            -ldflags="""
+              -X 'main.applicationName=${{env.APP_NAME}}' \
+            """
+          GOARCH=arm64 go build \
+            -o ${{env.BIN_NAME}}-arm64 \
+            -ldflags="""
+              -X 'main.applicationName=${{env.APP_NAME}}' \
+            """
       - name: Build macOS application
         run: |
           mkdir -p ${{env.APP_NAME}}.app/Contents/MacOS
@@ -41,9 +52,15 @@ jobs:
           </dict>
           </plist>
           """ > ${{env.APP_NAME}}.app/Contents/Info.plist
-          cp ${{env.BIN_NAME}} ${{env.APP_NAME}}.app/Contents/MacOS/${{env.BIN_NAME}}
+          mkdir amd64 arm64
+          cp ${{env.APP_NAME}}.app amd64
+          cp ${{env.BIN_NAME}}-amd64 amd64/${{env.APP_NAME}}.app/Contents/MacOS/${{env.BIN_NAME}}
+          cp ${{env.APP_NAME}}.app arm64
+          cp ${{env.BIN_NAME}}-arm64 arm64/${{env.APP_NAME}}.app/Contents/MacOS/${{env.BIN_NAME}}
       - name: Build ZIP
-        run: zip -r ${{env.APP_NAME}}.zip ${{env.APP_NAME}}.app
+        run: |
+          zip -r ${{env.APP_NAME}}-amd64.zip amd64/${{env.APP_NAME}}.app
+          zip -r ${{env.APP_NAME}}-arm64.zip arm64/${{env.APP_NAME}}.app
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
