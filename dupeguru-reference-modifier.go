@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	applicationName = "dupeGuru Reference Batch Modifier"
+	linkApplicationName = "placeholder"
 )
 
 var (

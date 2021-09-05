@@ -23,12 +23,12 @@ jobs:
           GOARCH=amd64 go build \
             -o ${{env.BIN_NAME}}-amd64 \
             -ldflags="""
-              -X 'main.applicationName=${{env.APP_NAME}}' \
+              -X 'main.linkApplicationName=${{env.APP_NAME}}' \
             """
           GOARCH=arm64 go build \
             -o ${{env.BIN_NAME}}-arm64 \
             -ldflags="""
-              -X 'main.applicationName=${{env.APP_NAME}}' \
+              -X 'main.linkApplicationName=${{env.APP_NAME}}' \
             """
       - name: Build macOS application
         run: |

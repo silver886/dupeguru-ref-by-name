@@ -29,7 +29,7 @@ const (
 )
 
 func gui() {
-	window := ui.NewWindow(applicationName, 1280, 720, true)
+	window := ui.NewWindow(linkApplicationName, 1280, 720, true)
 	window.SetMargined(true)
 
 	outer := ui.NewVerticalBox()
