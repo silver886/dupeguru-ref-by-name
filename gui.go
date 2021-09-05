@@ -13,6 +13,7 @@ import (
 
 const (
 	openButtonText                   = "Open"
+	setReferenceButtonText           = "Set the First as Reference"
 	saveButtonText                   = "Save"
 	fetchFileInfoButtonText          = "Fetch File Info"
 	sortByFilePathButtonText         = "Sort by File Path"
@@ -41,6 +42,10 @@ func gui() {
 
 	open := ui.NewButton(openButtonText)
 	file.Append(open, true)
+
+	setReference := ui.NewButton(setReferenceButtonText)
+	setReference.Disable()
+	file.Append(setReference, true)
 
 	save := ui.NewButton(saveButtonText)
 	save.Disable()
@@ -136,11 +141,18 @@ func gui() {
 			ui.MsgBoxError(window, "Parse Content Error", "Cannot parse "+filePath)
 		} else {
 			fileInfo = info
+			setReference.Enable()
 			save.Enable()
 			defaultAction.Enable()
 			fileInfoAction.Disable()
 			updateTable(oldRows, result.NumRows(tableModel))
 		}
+	})
+
+	setReference.OnClicked(func(*ui.Button) {
+		result.setFirstReference()
+		rows := result.NumRows(tableModel)
+		updateTable(rows, rows)
 	})
 
 	save.OnClicked(func(*ui.Button) {

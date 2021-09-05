@@ -38,6 +38,18 @@ type Result struct {
 	Groups  []Group  `xml:"group"`
 }
 
+func (r *Result) setFirstReference() {
+	for i, v := range result.Groups {
+		for j := range v.Files {
+			if j == 0 {
+				r.Groups[i].Files[j].IsRef = "y"
+			} else {
+				r.Groups[i].Files[j].IsRef = "n"
+			}
+		}
+	}
+}
+
 func (r *Result) locate(row, column int) (int, int, File) {
 	for i, v := range r.Groups {
 		if count := len(v.Files); row < count {
@@ -47,10 +59,6 @@ func (r *Result) locate(row, column int) (int, int, File) {
 		}
 	}
 	return 0, 0, File{}
-}
-
-func timespecToTime(ts syscall.Timespec) time.Time {
-	return time.Unix(int64(ts.Sec), int64(ts.Nsec))
 }
 
 func (r *Result) fetchFileInfo() {
