@@ -60,8 +60,12 @@ jobs:
           # cp ${{env.BIN_NAME}}-arm64 'arm64/${{env.APP_NAME}}.app/Contents/MacOS/${{env.BIN_NAME}}'
       - name: Build ZIP
         run: |
-          zip -r '${{env.APP_NAME}}-amd64.zip' 'amd64/${{env.APP_NAME}}.app'
-          # zip -r '${{env.APP_NAME}}-arm64.zip' 'arm64/${{env.APP_NAME}}.app'
+          pushd amd64
+          zip -r '${{env.APP_NAME}}-amd64.zip' '${{env.APP_NAME}}.app'
+          popd
+          # pushd arm64
+          # zip -r '${{env.APP_NAME}}-arm64.zip' '${{env.APP_NAME}}.app'
+          # popd
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
