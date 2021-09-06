@@ -50,9 +50,9 @@ jobs:
             <key>CFBundleExecutable</key>
             <string>${{env.BIN_NAME}}</string>
             <key>CFBundleShortVersionString</key>
-            <string>$(sed -re 's|$v||' <<< ${{github.event.release.tag_name}})</string>
+            <string>$(sed -re 's|^v||' <<< ${{github.event.release.tag_name}})</string>
             <key>CFBundleVersion</key>
-            <string>$(sed -re 's|$v||' <<< ${{github.event.release.tag_name}}).$(date +%s)</string>
+            <string>$(sed -re 's|^v||' <<< ${{github.event.release.tag_name}}).$(date +%s)</string>
           </dict>
           </plist>
           """ > '${{env.APP_NAME}}.app/Contents/Info.plist'
