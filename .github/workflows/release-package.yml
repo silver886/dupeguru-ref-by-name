@@ -42,6 +42,8 @@ jobs:
           <dict>
             <key>CFBundleName</key>
             <string>${{env.APP_NAME}}</string>
+            <key>CFBundleIconFile</key>
+            <string>dupeguru-reference-modifier.icns</string>
             <key>CFBundleIdentifier</key>
             <string>${{env.PKG_ID}}</string>
             <key>CFBundleExecutable</key>
