@@ -1,13 +1,15 @@
-name: Release ZIP
+name: Release application
 
 on:
   release:
-    types: [created]
+    types:
+      - created
+  workflow_call:
 
 jobs:
   publish:
     name: Publish
-    runs-on: macos-11
+    runs-on: macos-12
     permissions:
       contents: write
     env:
@@ -20,7 +22,7 @@ jobs:
       - name: Prepare environment
         uses: actions/setup-go@v2
         with:
-          go-version: "^1.17"
+          go-version: '^1.17'
       - name: Build binary
         run: |
           CGO_ENABLED=1 GOARCH=amd64 go build \
