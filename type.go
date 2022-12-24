@@ -8,6 +8,11 @@ import (
 	"time"
 )
 
+type FileHandler struct {
+	path string
+	mode os.FileMode
+}
+
 type File struct {
 	Path    string `xml:"path,attr"`
 	Words   string `xml:"words,attr"`
@@ -39,7 +44,7 @@ type Result struct {
 }
 
 func (r *Result) setFirstReference() {
-	for i, v := range result.Groups {
+	for i, v := range r.Groups {
 		for j := range v.Files {
 			if j == 0 {
 				r.Groups[i].Files[j].IsRef = "y"

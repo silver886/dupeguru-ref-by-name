@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/xml"
-	"io/ioutil"
 	"math"
 	"os"
 	"sort"
@@ -26,6 +25,11 @@ const (
 
 	ascending  = "▲"
 	descending = "▼"
+)
+
+var (
+	result      = &Result{}
+	fileHandler FileHandler
 )
 
 func gui() {
@@ -136,12 +140,15 @@ func gui() {
 			ui.MsgBoxError(window, "Open File Error", "Cannot open "+filePath)
 		} else if info, err := file.Stat(); err != nil {
 			ui.MsgBoxError(window, "Fetch File Info Error", "Cannot fetch info of "+filePath)
-		} else if content, err := ioutil.ReadFile(filePath); err != nil {
+		} else if content, err := os.ReadFile(filePath); err != nil {
 			ui.MsgBoxError(window, "Read Content Error", "Cannot read "+filePath)
 		} else if result.Groups = nil; xml.Unmarshal(content, result) != nil {
 			ui.MsgBoxError(window, "Parse Content Error", "Cannot parse "+filePath)
 		} else {
-			fileInfo = info
+			fileHandler = FileHandler{
+				path: filePath,
+				mode: info.Mode(),
+			}
 			setReference.Enable()
 			save.Enable()
 			defaultAction.Enable()
@@ -159,10 +166,8 @@ func gui() {
 	save.OnClicked(func(*ui.Button) {
 		if content, err := xml.Marshal(result); err != nil {
 			ui.MsgBoxError(window, "Encode Content Error", "Cannot encode modified content")
-		} else if filePath := ui.SaveFile(window); len(filePath) == 0 {
-			return
-		} else if os.WriteFile(filePath, content, fileInfo.Mode()) != err {
-			ui.MsgBoxError(window, "Write Content Error", "Cannot write to "+filePath)
+		} else if os.WriteFile(fileHandler.path, content, fileHandler.mode) != err {
+			ui.MsgBoxError(window, "Write Content Error", "Cannot write to "+fileHandler.path)
 		}
 	})
 
