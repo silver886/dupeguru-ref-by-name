@@ -8,14 +8,9 @@ on:
 jobs:
   create-release:
     name: Create release
-    runs-on: ubuntu-latest
     permissions:
       contents: write
-    steps:
-      - name: Create release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: Release ${{github.ref_name}}
+    uses: silver886/github-actions/.github/workflows/create-release.yaml@master
 
   release-application:
     name: Release application
