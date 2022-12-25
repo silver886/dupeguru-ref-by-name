@@ -18,11 +18,9 @@ jobs:
       PKG_ID: io.leoliu.dupeguru.reference-modifier
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Prepare environment
-        uses: actions/setup-go@v3
-        with:
-          go-version: '~1.19'
+        uses: silver886/github-actions/checkout@master
+      - name: Setup Go
+        uses: silver886/github-actions/setup/go@master
       - name: Build binary
         run: |
           CGO_ENABLED=1 GOARCH=amd64 go build \
@@ -74,7 +72,7 @@ jobs:
           # zip -r '../${{env.APP_NAME}}-arm64.zip' '${{env.APP_NAME}}.app'
           # popd
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: silver886/github-actions/create/release@master
         with:
           files: |
             ${{env.APP_NAME}}-amd64.zip
